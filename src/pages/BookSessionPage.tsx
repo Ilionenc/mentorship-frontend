@@ -1,3 +1,129 @@
+
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from '../api/axiosInstance';
+
+type Slot = {
+  id: number;
+  available_date: string;
+  available_time: string;
+};
+
+type Mentor = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+const BookSessionPage: React.FC = () => {
+  const { mentorId } = useParams();
+  const navigate = useNavigate();
+
+  const [mentor, setMentor] = useState<Mentor | null>(null);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [requestedSlotIds, setRequestedSlotIds] = useState<number[]>([]);
+
+  // Fetch mentor info
+  useEffect(() => {
+    const fetchMentor = async () => {
+      try {
+        const res = await axios.get(`/mentors/${mentorId}`);
+        setMentor(res.data);
+      } catch (err) {
+        console.error('Failed to load mentor info:', err);
+      }
+    };
+
+    const fetchSlots = async () => {
+      try {
+        const res = await axios.get(`/availability/${mentorId}`);
+        setSlots(res.data);
+      } catch (err) {
+        console.error('Failed to load availability:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (mentorId) {
+      fetchMentor();
+      fetchSlots();
+    }
+  }, [mentorId]);
+
+  const handleRequest = async (slot: Slot) => {
+    console.log('Sending request with data:',{
+        mentor_id: mentorId,
+        date: slot.available_date,
+        time: slot.available_time,
+      });
+
+
+    try {
+      const res = 
+      await axios.post('/mentor-requests', {
+        mentor_id: mentorId,
+        date: slot.available_date,
+        time: slot.available_time,
+      });
+      console.log ('Request sent successfully!:', res.data);
+
+      alert('✅ Request sent successfully!');
+
+      // Remove the requested slot from the list
+    //  setSlots(prev => prev.filter(s => s.id !==slot.id));
+
+      // mark as requested
+      setRequestedSlotIds((prev) => [...prev, slot.id]);
+
+
+
+      // redirect to see all requests
+      navigate('/my-requests'); 
+    } catch (err) {
+      console.error('❌ Failed to send request:', err);
+      alert('❌ Request already exit send a new request');
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h2>📆 Book a Session</h2>
+
+      {mentor && (
+        <p><strong>Mentor Name:</strong> {mentor.name}</p>
+      )}
+
+      <h3>Available Slots</h3>
+      {slots.length === 0 ? (
+        <p>No available slots at the moment.</p>
+      ) : (
+        slots.map((slot) => (
+          <div key={slot.id} style={{ marginBottom: '10px', border: '1px solid #ccc', padding: '10px' }}>
+            <p>{slot.available_date} at {slot.available_time}</p>
+            <button onClick={() => handleRequest(slot)}>📨 Request</button>
+          </div>
+        ))
+      )}
+
+      <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
+    </div>
+  );
+};
+
+export default BookSessionPage;
+
+
+
+
+
+
+/*
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../api/axiosInstance';
@@ -8,20 +134,55 @@ interface Slot {
   available_time: string;
 }
 
+
+//
+/*
+type Slot  = {
+  id: number;
+  available_date: string;
+  available_time: string}
+
+//
+
+
 const BookSessionPage: React.FC = () => {
   const { mentorId } = useParams(); // from URL: /book/:mentorId
   const navigate = useNavigate();
 
   const [slots, setSlots] = useState<Slot[]>([]);
+ 
   const [selectedSlotId, setSelectedSlotId] = useState('');
   const [topic, setTopic] = useState('');
   const [error, setError] = useState('');
 
+   //const [slotk, setSlotks] = useState<Slotkm[]>([]);
+
+
+  const handleRequest = async (slot: Slot) => {
+    try {
+
+        await axios.post('/mentorship_requests', {
+        mentor_Id: mentorId,
+        date: slot.available_date,
+        time: slot.available_time,
+    });
+        alert('Request sent successfully - Redirecting to My Requests Page');
+        navigate(`/my-requests`);
+    }
+    catch (err) {
+        console.error('Failed to send request:', err);
+        alert('Request failed');
+
+    }
+  };
+
+
+
   useEffect(() => {
     const fetchSlots = async () => {
       try {
-       const res = await axios.get(`/discover`);
-        //const res = await axios.get(`/availability/${mentorId}`);
+      // const res = await axios.get(`/discover`);
+        const res = await axios.get(`/availability/${mentorId}`);
         console.log('Available Slots:', slots);
 
         setSlots(res.data);
@@ -54,7 +215,7 @@ const BookSessionPage: React.FC = () => {
       });
 
       alert('✅ Session booked successfully!');
-      navigate('/my-sessions');
+      navigate('/my-requests');
     } catch (err: any) {
       console.error('❌ Booking error:', err.message);
       setError(err.response?.data?.error || 'Booking failed');
@@ -63,7 +224,9 @@ const BookSessionPage: React.FC = () => {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>📆 Book a Session with Mentor</h2>
+      <h2>📆 Book a new Session with a Mentor:</h2> 
+
+      
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
@@ -78,12 +241,15 @@ const BookSessionPage: React.FC = () => {
           <option value="">-- Choose a time slot --</option>
           {slots.map((slot) => (
             <option key={slot.id} value={slot.id}>
-              {slot.available_date}{slot.available_time ?'at ${slot.available_time}':'(no time)'}
+              {slot.available_date} 'a' {slot.available_time}
             </option>
           ))}
         </select><br /><br />
 
-        <button type="submit">✅ Book Session</button>
+       
+       <button onClick={() => handleRequest(slot)}>📅 Send my Request</button>
+       
+        
       </form>
     </div>
   );

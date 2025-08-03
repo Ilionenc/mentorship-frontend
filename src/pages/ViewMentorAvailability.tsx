@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const ViewMentorAvailability: React.FC = () => {
   const [mentors, setMentors] = useState([]);
   const [selectedMentorId, setSelectedMentorId] = useState('');
   const [slots, setSlots] = useState([]);
   const [message, setMessage] = useState('');
+     const navigate = useNavigate();
 
   const fetchMentors = async () => {
     const res = await axios.get('/mentors'); // ⬅️ already built
@@ -85,6 +88,8 @@ const ViewMentorAvailability: React.FC = () => {
           </ul>
         </>
       )}
+       <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
     </div>
   );
 };

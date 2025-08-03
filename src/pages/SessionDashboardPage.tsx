@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
+import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const SessionDashboardPage: React.FC = () => {
   const [sessions, setSessions] = useState<any[]>([]);
   const [filter, setFilter] = useState('all');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const { menteeId } = useParams();
+  
 
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const res = await axios.get('/sessions/dashboard');
+        const res = await axios.get(`/sessions/dashboard/${menteeId}`);
         setSessions(res.data);
       } catch (err: any) {
         console.error('❌ Failed to fetch sessions:', err.response?.data || err.message);
@@ -28,15 +33,22 @@ const SessionDashboardPage: React.FC = () => {
     <div style={{ padding: '20px' }}>
       <h2>📅 My Sessions</h2>
 
+      <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
+
+      <br />
+      <br />
+
       {message && <p style={{ color: 'red' }}>{message}</p>}
 
       <div style={{ marginBottom: '20px' }}>
         <label>Filter Sessions: </label>
         <select value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="all">All</option>
-          <option value="scheduled">Scheduled</option>
+          <option value="accepted">Scheduled</option>
           <option value="cancelled">Cancelled</option>
           <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
         </select>
       </div>
 
@@ -55,11 +67,12 @@ const SessionDashboardPage: React.FC = () => {
                 backgroundColor: '#f9f9f9'
               }}
             >
-              <strong>{session.topic}</strong><br />
+              <strong>Topic:{session.topic}</strong><br />
               <span style={{
-                backgroundColor: session.status === 'scheduled' ? 'green'
+                backgroundColor: session.status === 'accepted' ? 'green'
                   : session.status === 'cancelled' ? 'red'
-                  : 'gray',
+                  : session.status === 'pending' ? 'gray'
+                  : 'blue',
                 color: 'white',
                 padding: '2px 8px',
                 borderRadius: '8px',
@@ -72,8 +85,9 @@ const SessionDashboardPage: React.FC = () => {
               </p>
               <p style={{ margin: '6px 0' }}>
                 Mentor: {session.mentor_name} ({session.mentor_email})<br />
-                Mentee: {session.mentee_name} ({session.mentee_email})
+                Mentee: {session.mentee_name} 
               </p>
+              
             </li>
           ))}
         </ul>

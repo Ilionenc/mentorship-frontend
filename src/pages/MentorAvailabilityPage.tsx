@@ -26,6 +26,13 @@ const MentorAvailabilityFormPage: React.FC = () => {
     <div>
       <h2>➕ Add Availability</h2>
       {message && <p>{message}</p>}
+
+        <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
+
+      <br />
+       <br />
+
       <form onSubmit={handleSubmit}>
         <label>Date:</label><br />
         <input type="date" value={available_date} onChange={(e) => setDate(e.target.value)} required /><br /><br />
@@ -37,7 +44,7 @@ const MentorAvailabilityFormPage: React.FC = () => {
       </form>
 
       <br />
-      <button onClick={() => navigate('/dashboard')}>🏠 Go Home</button>
+      <button onClick={() => navigate('/')}>🏠 Go Home</button>
     </div>
   );
 };

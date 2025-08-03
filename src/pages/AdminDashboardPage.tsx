@@ -3,6 +3,166 @@ import React, { useEffect, useState } from 'react';
 import axios from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 
+
+type User = {
+  id: number;
+  name: string;
+  skills: string[];
+};
+
+type Availability = {
+  mentor_id: number;
+  available_date: string;
+  available_time: string;
+};
+
+
+const AdminDashboardPage = () => {
+  const [mentors, setMentors] = useState<User[]>([]);
+  
+  const [mentees, setMentees] = useState<User[]>([]);
+  const [availabilities, setAvailabilities] = useState<Availability[]>([]);
+  const [skillFilter, setSkillFilter] = useState('');
+
+  const [selectedMentor, setSelectedMentor] = useState('');
+  const [selectedMentee, setSelectedMentee] = useState('');
+   const [availability, setAvailability] = useState('');
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [mentorRes, menteeRes, availRes] = await Promise.all([
+        axios.get('/admin/mentors'),
+        axios.get('/admin/mentees'),
+        axios.get('/admin/availability'),
+      ]);
+
+      setMentors(mentorRes.data);
+      setMentees(menteeRes.data);
+      setAvailabilities(availRes.data);
+    };
+
+    fetchData();
+  }, []);
+
+
+
+useEffect(() => {
+  const fetchAvailability = async () => {
+    if (!selectedMentor) return;
+    try {
+      const res = await axios.get(`/api/availability/${selectedMentor}`);
+      setAvailability(res.data); // store in state
+    } catch (err) {
+      console.error('Failed to fetch mentor availability:', err);
+    }
+  };
+
+  fetchAvailability();
+}, [selectedMentor]);
+
+
+
+
+
+
+
+
+  // Extract available mentor IDs
+  const mentorsWithAvailability = new Set(availabilities.map((a) => a.mentor_id));
+
+  // Filter mentors by skill and availability
+  const filteredMentors = mentors.filter(
+    (m) =>
+      (!skillFilter || m.skills?.includes(skillFilter)) &&
+      mentorsWithAvailability.has(m.id)
+  );
+
+  // Filter mentees by skill
+  const filteredMentees = mentees.filter(
+    (m) => !skillFilter || m.skills?.includes(skillFilter)
+  );
+
+  const handleMatch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.post('/admin/match', {
+        mentor_id: selectedMentor,
+        mentee_id: selectedMentee,
+      });
+      alert('✅ Match created!');
+    } catch (err) {
+      console.error('❌ Failed to match:', err);
+      alert('❌ Match failed. Check console.');
+    }
+  };
+
+  return (
+    <div>
+      <h2>🛠 Admin Dashboard</h2>
+
+      <label>Filter by Skill:</label>
+      <select value={skillFilter} onChange={(e) => setSkillFilter(e.target.value)}>
+        <option value="">-- All Skills --</option>
+        <option value="Graphics Designing">Graphics Designing</option>
+        <option value="UI/UX">UI/UX</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Software Development">Software Development</option>
+        <option value="Gaming Development">Gaming Development</option>
+        <option value="Gen AI">Gen AI</option>
+        <option value="Data Analysis">Data Analysis</option>
+        <option value="Cybersecurity">Cybersecurity</option>
+        <option value="Virtual Assistant">Virtual Assistant</option>
+        <option value="Natural Programming Language">Natural Programming Language</option>
+        <option value="Python">Python</option>
+        <option value="JavaScript">JavaScript</option>
+        <option value="TypeScript">TypeScript</option>
+      </select>
+
+      <h3>🔗 Match Mentor with Mentee</h3>
+      <form onSubmit={handleMatch}>
+        <label>Select Mentor:</label><br />
+        <select value={selectedMentor} onChange={(e) => setSelectedMentor(e.target.value)} required>
+          <option value="">-- Choose Mentor --</option>
+          {filteredMentors.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name} ({m.skills?.join(', ')})
+            </option>
+          ))}
+        </select><br /><br />
+
+
+
+
+
+        
+
+        <label>Select Mentee:</label><br />
+        <select value={selectedMentee} onChange={(e) => setSelectedMentee(e.target.value)} required>
+          <option value="">-- Choose Mentee --</option>
+          {filteredMentees.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name} ({m.skills?.join(', ')})
+            </option>
+          ))}
+        </select><br /><br />
+
+        <button type="submit">🔗 Match</button>
+      </form>
+    </div>
+  );
+};
+
+export default AdminDashboardPage;
+
+
+
+
+/*
+import React, { useEffect, useState } from 'react';
+import axios from '../api/axiosInstance';
+import { useNavigate } from 'react-router-dom';
+
 const AdminDashboardPage: React.FC = () => {
   const [mentors, setMentors] = useState<any[]>([]);
   const [mentees, setMentees] = useState<any[]>([]);
@@ -13,6 +173,31 @@ const AdminDashboardPage: React.FC = () => {
   const [selectedMentee, setSelectedMentee] = useState('');
 
    const navigate = useNavigate();
+
+
+
+  const [requests, setRequests] = useState<any[]>([]);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const fetchMatch = async () => {
+      try {
+        const res = await axios.get('/requests/me2');
+        setRequests(res.data);
+      } catch (err: any) {
+        setMessage('❌ Failed to load incoming requests');
+      }
+    };
+
+    fetchMatch();
+  }, []);
+
+
+
+
+
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +226,28 @@ const AdminDashboardPage: React.FC = () => {
     };
     fetchData();
   }, []);
+
+
+const handleRespond = async () => {
+    try {
+      await axios.put(`/requests/respond`);
+      setMessage(`✅ Matched successfully`);
+     alert('✅ OK');
+
+ 
+       
+
+
+     
+       
+    } catch (err: any) {
+      setMessage('❌ Failed to respond');
+    }
+  };
+
+
+
+
 
   const filteredMentors = mentors.filter((m) =>
     skillFilter ? m.skills?.includes(skillFilter) : true
@@ -96,7 +303,9 @@ const AdminDashboardPage: React.FC = () => {
         onSubmit={async (e) => {
           e.preventDefault();
           try {
-            await axios.post('/admin/match', {
+            console.log('Selected Mentor:', selectedMentor);
+            console.log('Selected Mentee:', selectedMentee);
+            await axios.post('/admin/matches', {
               mentor_id: selectedMentor,
               mentee_id: selectedMentee,
             });
@@ -123,8 +332,14 @@ const AdminDashboardPage: React.FC = () => {
           ))}
         </select><br /><br />
 
-        <button type="submit">🔗 Match</button>
+        
+ <button onClick={() => handleRespond()}>✅ Matched</button>{' '}
+
+       
       </form>
+
+       <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
     </div>
   );
 };

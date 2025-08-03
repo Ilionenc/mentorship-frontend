@@ -1,73 +1,3 @@
-// src/pages/LoginPage.tsximport { useNavigate } from 'react-router-dom';
-import axios from '../api/axiosInstance';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {Link} from 'react-router-dom'
-
-
-const LoginPage = () => {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [message, setMessage] = useState('');
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post('/auth/login', form);
-     // email: form.email
-     // password: form.password,
-      const { token } = res.data;
-
-      localStorage.setItem('token', token);
-      console.log('Token stored:', token)
-
-      // ✅ Fetch profile info
-      const profile = await axios.get('/profile/me');
-
-      // ✅ Check if profile is incomplete
-      const { name, role } = profile.data;
-
-      if (!name || !role) {
-        navigate('/profile/edit'); // Redirect to complete profile
-      } else {
-        // ✅ Redirect to role-based dashboard   else if (role === 'mentor') navigate('/availability/mentorId');
-        if (role === 'admin') navigate('/admin');
-        
-        else if (role === 'mentor') navigate('/mentorDashboard');
-        else navigate('/menteeDashboard');
-      }
-    } catch (err: any) {
-      console.error('Login failed:', err);
-      setMessage('❌ Login failed. Check email/password.');
-    }
-  };
-
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>🔐 Login</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleLogin}>
-        <input name="email" placeholder="Email" onChange={handleChange} required /><br /><br />
-        <input name="password" type="password" placeholder="Password" onChange={handleChange} required /><br /><br />
-        <button type="submit">➡️ Login</button>
-        <p>
-        Don’t have an account? <Link to="/register">Register here</Link>
-        </p>
-      </form>
-
-       <br />
-      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
-    </div>
-  );
-};
-
-export default LoginPage;
-
-/*
 import React, { useState } from 'react';
 import axios from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
@@ -82,7 +12,7 @@ import {Link} from 'react-router-dom'
 
 
 
-const LoginPage: React.FC = () => {
+const LoginRegPage: React.FC = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
@@ -100,7 +30,8 @@ const LoginPage: React.FC = () => {
       setMessage('✅ Login successful!');
 
     // navigate('/profile/edit');// Redirect to profile or dashboard
-    navigate('/UserRolePage');// Redirect to role page
+    navigate('/ProfileFormPage');// Redirect to Complete Profile page
+   //  navigate('/UserRolePage');// Redirect to role page
       
     } catch (err: any) {
       setMessage('❌ Login failed: ' + err.response?.data?.error || 'Server error');
@@ -119,18 +50,20 @@ const LoginPage: React.FC = () => {
         <input type="password" name="password" value={form.password} onChange={handleChange} required /><br /><br />
 
         <button type="submit">Login</button>
-        
+        <Link to="/ProfileFormPage"></Link>
+       
       </form>
 
       {/* 👇 This is where you paste it 
+      <p>
         Don't have an account? <Link to="/register">Register here</Link>
       </p>
+      */}
     </div>
   );
 };
 
-*/
-      
+
 
 
 /*
@@ -179,7 +112,6 @@ const LoginPage = () => {
     </div>
   );
 };
-
-
-export default LoginPage;
 */
+
+export default LoginRegPage;

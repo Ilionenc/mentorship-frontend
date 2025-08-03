@@ -80,25 +80,25 @@ const handleSubmit = async (e: React.FormEvent) => {
     localStorage.setItem('userRole', res.data.role);
 
 
-    setMessage('✅ Profile updated successfully!');
+    setMessage('✅ Profile saved successfully!');
     console.log('Profile response:', res.data);
 
     // Redirect to role-based page after update
     if (res.data.role === 'Admin') {
      // navigate('/admin/users');
-      navigate('/user-role');
+      navigate('/admin');
     } else if (res.data.role === 'Mentor') {
      // navigate('/availability');
-      navigate('/user-role');
+      navigate('/availability/mentorI');
     } else if (res.data.role === 'Mentee'){
       //navigate('/mentors');
-       navigate('/user-role');
+       navigate('/mentees');
     } else {
        navigate('/');
     }
 
   } catch (err: any) {
-    setMessage('❌ Failed to update profile: ' + (err.response?.data?.error || 'Server error'));
+    setMessage('❌ Failed to save profile: ' + (err.response?.data?.error || 'Server error'));
   }
 };
 

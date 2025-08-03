@@ -9,12 +9,18 @@ const DiscoveryPage: React.FC = () => {
    const navigate = useNavigate();
 
 
-
+/*
 const handleClick = () => {
   alert('Redirecting to Booksession page');
     navigate(`/book/:mentorId`);
   };
+  */
+// const goToAvailability = (mentorId: number) => {
 
+  const handleBookSession = (mentorId: number) => {
+     alert('Redirecting to Booksession page');
+    navigate(`/book/${mentorId}`);
+  };
 
 
   useEffect(() => {
@@ -32,7 +38,10 @@ const handleClick = () => {
   return (
     <div>
       <h2>🎓 Discover Mentors by Skill</h2>
-
+ <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
+      <br />
+      <br />
       <label>Select Skill:</label>
       <select value={selectedSkill} onChange={(e) => setSelectedSkill(e.target.value)}>
         <option value="">-- All Skills --</option>
@@ -59,9 +68,12 @@ const handleClick = () => {
           <p>Email: {mentor.email}</p>
           <p>Skills: {mentor.skills.join(', ')}</p>
          
-          <button onClick={handleClick}>BookSession</button>
+        <button onClick={() => handleBookSession(mentor.id)}>📅 Book  a Session</button>
         </div>
       ))}
+
+        <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
     </div>
   );
 };

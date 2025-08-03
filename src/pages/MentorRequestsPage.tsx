@@ -8,28 +8,35 @@ const MentorRequestsPage: React.FC = () => {
   useEffect(() => {
     const fetchIncoming = async () => {
       try {
-        const res = await axios.get('/requests/incoming');
+        const res = await axios.get('/requests/me2');
         setRequests(res.data);
       } catch (err: any) {
         setMessage('❌ Failed to load incoming requests');
       }
     };
 
-
-
-
-
-    
     fetchIncoming();
   }, []);
+
+
+
 
   const handleRespond = async (id: number, action: 'accepted' | 'rejected') => {
     try {
       await axios.put(`/requests/${id}/respond`, { status: action });
       setMessage(`✅ Request ${action}`);
+     alert('✅ OK');
+
+ 
+     
       setRequests((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status: action } : r))
+
+       
+
+
       );
+       
     } catch (err: any) {
       setMessage('❌ Failed to respond');
     }
@@ -53,11 +60,15 @@ const MentorRequestsPage: React.FC = () => {
               borderRadius: '8px',
             }}
           >
-            <p><strong>Mentee:</strong> {req.mentee_name} ({req.mentee_email})</p>
-            <p><strong>Status:</strong> {req.status}</p>
+           
+             <p><strong>Mentee:</strong> {req.mentee_name}</p>
+            <p><strong>Date:</strong> {req.date}</p>
+            <p><strong>Time:</strong> {req.time}</p>
+           
             {req.status === 'pending' && (
               <div>
                 <button onClick={() => handleRespond(req.id, 'accepted')}>✅ Accept</button>{' '}
+                
                 <button onClick={() => handleRespond(req.id, 'rejected')}>❌ Reject</button>
               </div>
             )}

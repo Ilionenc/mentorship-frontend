@@ -28,7 +28,7 @@ const MentorshipDiscoveryPage: React.FC = () => {
 
  // const goToAvailability = (mentorId: number) => {
   const handleBookSession = (mentorId: number) => {
-    navigate(`/book/:mentorId`);
+    navigate(`/book/${mentorId}`);
   };
 
   return (

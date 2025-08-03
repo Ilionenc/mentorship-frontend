@@ -62,7 +62,7 @@ const ProfileFormPage: React.FC = () => {
       if (res.data.role === 'Admin') {
         navigate('/admin');
       } else if (res.data.role === 'Mentor') {
-        navigate('/availability');
+        navigate('/availability/mentorId');
       } else {
         navigate('/mentors');
       }

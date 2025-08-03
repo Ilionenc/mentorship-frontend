@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
+import { useParams, useNavigate } from 'react-router-dom';
+
+
 
 const MyRequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<any[]>([]);
   const [message, setMessage] = useState('');
+
+   const navigate = useNavigate();
 
   // ✅ Fetch sent requests on load
   useEffect(() => {
@@ -27,7 +32,7 @@ const MyRequestsPage: React.FC = () => {
 
     try {
       await axios.delete(`/requests/${id}/cancel`);
-      setMessage('✅ Request canceled');
+      setMessage('✅ Request canceled and Deleted');
       setRequests((prev) => prev.filter((r) => r.id !== id));
     } catch (err: any) {
       console.error('❌ Cancel error:', err.response?.data || err.message);
@@ -35,9 +40,14 @@ const MyRequestsPage: React.FC = () => {
     }
   };
 
+
+  
+
   return (
     <div style={{ padding: '20px' }}>
-      <h2>📩 My Mentorship Requests</h2>
+      <h2>📩 My Mentorship Requests</h2> 
+      <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
 
       {message && <p>{message}</p>}
 
@@ -55,7 +65,8 @@ const MyRequestsPage: React.FC = () => {
               boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
             }}
           >
-            <p><strong>Mentor:</strong> {req.mentor_name} ({req.mentor_email})</p>
+            <p><strong>Mentor:</strong> {req.mentor_name} </p>
+            <p><strong>Date:</strong> {req.date} at {req.time}</p>
             <p>
               <strong>Status:</strong>{' '}
               <span
@@ -94,6 +105,8 @@ const MyRequestsPage: React.FC = () => {
           </div>
         ))
       )}
+      <br />
+      <button onClick={() => navigate(-1)}>⬅️ Go Back</button>
     </div>
   );
 };

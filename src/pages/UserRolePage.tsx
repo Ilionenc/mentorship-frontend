@@ -24,8 +24,8 @@ const UserRolePage: React.FC = () => {
         navigate('/availability/mentorId');
         break;
       case 'mentee':
-       //discover
-       navigate('/discover');
+       //Go to Mentee Dashboard
+       navigate('/menteeDashboard');
       // navigate('/mentors/availability');
         break;
       default:
